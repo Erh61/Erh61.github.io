@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Güvenli Ödeme | BluePhone Technology</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .payment-section {
+            padding: 120px 0 6rem;
+            min-height: 100vh;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .checkout-form-container {
+            padding: 2.5rem;
+        }
+
+        .checkout-summary-container {
+            padding: 2rem;
+            position: sticky;
+            top: 110px;
+        }
+
+        .form-section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--surface-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Interactive Card Preview */
+        .card-preview-wrapper {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .credit-card {
+            width: 100%;
+            max-width: 380px;
+            height: 220px;
+            background: linear-gradient(135deg, #0d1527 0%, #1e293b 100%);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .credit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .card-chip {
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .card-number-display {
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            font-family: monospace;
+            margin: 1.5rem 0 1rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-bottom-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .card-holder-display {
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-holder-display .val {
+            color: white;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .card-expiry-display {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .card-expiry-display .val {
+            color: white;
+            font-weight: 600;
+            font-family: monospace;
+            margin-top: 2px;
+        }
+
+        /* Summary List */
+        .summary-items {
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 1.5rem 0;
+            padding-right: 0.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .summary-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .summary-item-info {
+            flex-grow: 1;
+        }
+
+        .summary-item-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+
+        .summary-item-info p {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .price-row.total {
+            border-top: 1px solid var(--surface-border);
+            padding-top: 1rem;
+            margin-top: 1rem;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+
+        .price-row.total span:last-child {
+            color: var(--primary);
+        }
+
+        /* Success Modal */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-modal {
+            text-align: center;
+            max-width: 450px;
+            padding: 3rem;
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            transform: scale(0.8);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .success-overlay.active .success-modal {
+            transform: scale(1);
+        }
+
+        .success-icon-container {
+            width: 100px;
+            height: 100px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 3rem;
+            color: #22c55e;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        .countdown-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .countdown-fill {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            animation: countdown 3s linear forwards;
+        }
+
+        @keyframes countdown {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0%;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-summary-container {
+                position: static;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Glow -->
+    <div class="blob-glow"
+        style="position: fixed; top: 10%; left: 10%; width: 500px; height: 500px; background: var(--primary); filter: blur(150px); opacity: 0.1; z-index: -1; pointer-events: none;">
+    </div>
+
+    <!-- Success Screen Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="glass-card success-modal">
+            <div class="success-icon-container">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Siparişiniz Alındı!</h2>
+            <p style="color: var(--text-muted); line-height: 1.6;">Ödemeniz başarıyla gerçekleştirildi. Sipariş
+                detaylarınız e-posta adresinize gönderilmiştir. Alışverişiniz için teşekkür ederiz.</p>
+            <div class="countdown-bar">
+                <div class="countdown-fill"></div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem;">Ana sayfaya
+                yönlendiriliyorsunuz...</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">BLUEPHONE</a>
+            <ul class="nav-links">
+                <li><a href="index.html#home">Ana Sayfa</a></li>
+                <li><a href="about.html">Hakkımızda</a></li>
+                <li><a href="products.html">Ürünler</a></li>
+                <li><a href="technology.html">Teknoloji</a></li>
+                <li><a href="contact.html">İletişim</a></li>
+            </ul>
+            <div class="theme-customizer">
+                <span class="theme-label">Tema:</span>
+                <div class="theme-dot cyan" data-theme="cyan" id="paymentThemeCyan"></div>
+                <div class="theme-dot pink" data-theme="pink" id="paymentThemePink"></div>
+                <div class="theme-dot purple" data-theme="purple" id="paymentThemePurple"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Payment Main Section -->
+    <main class="payment-section">
+        <div class="container">
+            <div class="checkout-grid">
+                <!-- Left: Checkout Form -->
+                <div class="glass-card checkout-form-container">
+                    <h2
+                        style="font-size: 2rem; margin-bottom: 2rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Güvenli Alışveriş</h2>
+
+                    <form id="paymentForm">
+                        <!-- Personal Info -->
+                        <div class="form-section-title">
+                            <i class="fa-solid fa-user"></i> Kişisel Bilgiler
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstName">Adınız</label>
+                                <input type="text" id="firstName" placeholder="Örn. Can" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Soyadınız</label>
+                                <input type="text" id="lastName" placeholder="Örn. Yılmaz" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-posta Adresi</label>
+                                <input type="email" id="email" placeholder="canyilmaz@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Telefon Numarası</label>
+                                <input type="tel" id="phone" placeholder="0555 123 45 67" required>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Address -->
+                        <div class="form-section-title">
+                            <i class="fa-solid fa-truck"></i> Teslimat Adresi
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="address">Açık Adres</label>
+                                <textarea id="address" rows="3" placeholder="Sokak, mahalle, apartman no, daire no..."
+                                    required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="city">Şehir</label>
+                                <input type="text" id="city" placeholder="İstanbul" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="zipCode">Posta Kodu</label>
+                                <input type="text" id="zipCode" placeholder="34000" required>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details -->
+                        <div class="form-section-title">
+                            <i class="fa-solid fa-credit-card"></i> Kart Bilgileri
+                        </div>
+                        <div class="form-grid">
+                            <!-- Visual Card Preview -->
+                            <div class="card-preview-wrapper">
+                                <div class="credit-card">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div class="card-chip"></div>
+                                        <i class="fa-brands fa-cc-visa fa-2xl" style="color: white; opacity: 0.8;"></i>
+                                    </div>
+                                    <div class="card-number-display" id="cardNumPreview">•••• •••• •••• ••••</div>
+                                    <div class="card-bottom-info">
+                                        <div class="card-holder-display">
+                                            <div style="font-size: 0.65rem;">KART SAHİBİ</div>
+                                            <div class="val" id="cardHolderPreview">AD SOYAD</div>
+                                        </div>
+                                        <div class="card-expiry-display">
+                                            <div style="font-size: 0.65rem;">SON KUL.</div>
+                                            <div class="val" id="cardExpiryPreview">AA/YY</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="cardName">Kart Sahibi Adı Soyadı</label>
+                                <input type="text" id="cardName" placeholder="Kartın üzerindeki isim" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="cardNumber">Kart Numarası</label>
+                                <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cardExpiry">Son Kullanma Tarihi</label>
+                                <input type="text" id="cardExpiry" placeholder="AA/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cardCvv">CVC/CVV</label>
+                                <input type="password" id="cardCvv" placeholder="•••" maxlength="3" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"
+                            style="width: 100%; font-size: 1.1rem; padding: 16px;">
+                            Ödemeyi Güvenle Tamamla
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Order Summary -->
+                <div class="glass-card checkout-summary-container">
+                    <h3
+                        style="font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.5rem;">
+                        Sipariş Özeti</h3>
+
+                    <div class="summary-items" id="summaryItemsList">
+                        <!-- Cart items will be loaded dynamically -->
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <div class="price-row">
+                            <span>Ara Toplam</span>
+                            <span id="summarySubtotal">0 ₺</span>
+                        </div>
+                        <div class="price-row" id="summaryDiscountRow" style="display: none; color: #22c55e;">
+                            <span>İndirim (BLUE2026)</span>
+                            <span id="summaryDiscountAmount">-0 ₺</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Kargo</span>
+                            <span style="color: #22c55e; font-weight: 600;">Ücretsiz</span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Toplam Tutar</span>
+                            <span id="summaryTotal">0 ₺</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="padding: 4rem 0; border-top: 1px solid var(--surface-border); background: var(--bg-color);">
+        <div class="container">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div class="logo">BLUEPHONE</div>
+                <div style="color: var(--text-muted)">© 2026 BluePhone Technology. Tüm Hakları Saklıdır.</div>
+                <div class="social-links" style="display: flex; gap: 1.5rem;">
+                    <a href="https://www.instagram.com/erhan_kznc6154/" target="_blank"
+                        style="color: var(--text-muted)"><i class="fa-brands fa-instagram fa-xl"></i></a>
+                    <a href="https://x.com" target="_blank" style="color: var(--text-muted)"><i
+                            class="fa-brands fa-x-twitter fa-xl"></i></a>
+                    <a href="https://www.linkedin.com/in/erhan-kazanc%C4%B1-845234406/" target="_blank"
+                        style="color: var(--text-muted)"><i class="fa-brands fa-linkedin-in fa-xl"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sync custom theme
+        const savedTheme = localStorage.getItem('bluephone-theme') || 'cyan';
+        document.body.className = savedTheme === 'cyan' ? '' : `theme-${savedTheme}`;
+
+        // Highlight active theme dot on checkout page
+        document.querySelectorAll('.theme-dot').forEach(dot => {
+            if (dot.getAttribute('data-theme') === savedTheme) {
+                dot.classList.add('active');
+            }
+            dot.addEventListener('click', () => {
+                const theme = dot.getAttribute('data-theme');
+                localStorage.setItem('bluephone-theme', theme);
+                document.body.className = theme === 'cyan' ? '' : `theme-${theme}`;
+                document.querySelectorAll('.theme-dot').forEach(td => {
+                    if (td.getAttribute('data-theme') === theme) {
+                        td.classList.add('active');
+                    } else {
+                        td.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Load Cart Items to Order Summary
+        const summaryItemsList = document.getElementById('summaryItemsList');
+        const summarySubtotal = document.getElementById('summarySubtotal');
+        const summaryDiscountRow = document.getElementById('summaryDiscountRow');
+        const summaryDiscountAmount = document.getElementById('summaryDiscountAmount');
+        const summaryTotal = document.getElementById('summaryTotal');
+
+        let cart = [];
+        try {
+            cart = JSON.parse(localStorage.getItem('bluephone-cart')) || [];
+        } catch (e) {
+            cart = [];
+        }
+
+        const renderOrderSummary = () => {
+            if (cart.length === 0) {
+                summaryItemsList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">Sepetinizde ürün bulunmamaktadır.</p>';
+                summarySubtotal.textContent = '0 ₺';
+                summaryTotal.textContent = '0 ₺';
+                return;
+            }
+
+            summaryItemsList.innerHTML = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                const price = parseInt(item.price.replace(/[^0-9]/g, ''));
+                subtotal += price;
+
+                const element = document.createElement('div');
+                element.className = 'summary-item';
+                element.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="summary-item-info">
+                        <h4>${item.name}</h4>
+                        <p>${item.price}</p>
+                    </div>
+                `;
+                summaryItemsList.appendChild(element);
+            });
+
+            summarySubtotal.textContent = subtotal.toLocaleString('tr-TR') + ' ₺';
+
+            // Check if coupon BLUE2026 is applied (discount code)
+            const couponApplied = localStorage.getItem('bluephone-discount') === 'true' ||
+                (cart.length > 0 && localStorage.getItem('bluephone-discount') === null && document.referrer.includes('discount')); // fallback
+
+            // For this design, let's read the discountApplied state dynamically
+            let isDiscount = false;
+            // If they applied coupon BLUE2026 on index/products page, the coupon message is visible.
+            // Let's check if the script.js has set any discount marker.
+            // We'll read the localStorage 'bluephone-cart-discount' or just default to check if coupon BLUE2026 applies.
+            if (localStorage.getItem('bluephone-discount') === 'true' || localStorage.getItem('bluephone-cart-discount') === 'true') {
+                isDiscount = true;
+            }
+
+            if (isDiscount) {
+                const discount = subtotal * 0.1;
+                const total = subtotal - discount;
+                summaryDiscountRow.style.display = 'flex';
+                summaryDiscountAmount.textContent = '-' + discount.toLocaleString('tr-TR') + ' ₺';
+                summaryTotal.textContent = total.toLocaleString('tr-TR') + ' ₺';
+            } else {
+                summaryDiscountRow.style.display = 'none';
+                summaryTotal.textContent = subtotal.toLocaleString('tr-TR') + ' ₺';
+            }
+        };
+
+        renderOrderSummary();
+
+        // Card Preview Interaction
+        const cardNameInput = document.getElementById('cardName');
+        const cardNumberInput = document.getElementById('cardNumber');
+        const cardExpiryInput = document.getElementById('cardExpiry');
+
+        const cardHolderPreview = document.getElementById('cardHolderPreview');
+        const cardNumPreview = document.getElementById('cardNumPreview');
+        const cardExpiryPreview = document.getElementById('cardExpiryPreview');
+
+        cardNameInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim().toUpperCase();
+            cardHolderPreview.textContent = val || 'AD SOYAD';
+        });
+
+        // Format Card Number (adds spaces every 4 digits)
+        cardNumberInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedVal = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedVal += ' ';
+                }
+                formattedVal += val[i];
+            }
+            e.target.value = formattedVal;
+            cardNumPreview.textContent = formattedVal || '•••• •••• •••• ••••';
+        });
+
+        // Format Card Expiry (adds slash)
+        cardExpiryInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            if (val.length > 2) {
+                val = val.substring(0, 2) + '/' + val.substring(2, 4);
+            }
+            e.target.value = val;
+            cardExpiryPreview.textContent = val || 'AA/YY';
+        });
+
+        // Form Submission
+        const paymentForm = document.getElementById('paymentForm');
+        const successOverlay = document.getElementById('successOverlay');
+
+        paymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Form validation is handled by browser HTML5 properties
+            // Show premium success overlay
+            successOverlay.classList.add('active');
+
+            // Clear the cart
+            localStorage.removeItem('bluephone-cart');
+            localStorage.removeItem('bluephone-discount');
+            localStorage.removeItem('bluephone-cart-discount');
+
+            // Redirect to index after 3 seconds
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 3000);
+        });
+    </script>
+</body>
+
+</html>
